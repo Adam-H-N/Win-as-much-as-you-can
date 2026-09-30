@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="./style.css">
+  <title>Projector</title>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import { TEAMS, MULT, $, fmt, cls, listenState } from './common.js';
+
+    function draw(s) {
+      if (s.phase === 'lobby') {
+        $('#app').innerHTML = '<div class="ctr" style="padding-top:8vh"><h1 style="font-size:3rem">🎯 Win As Much As You Can</h1><p class="mut" style="font-size:1.4rem">Red · Blue · Yellow · Green<br>Waiting for the game to start…</p></div>';
+        return;
+      }
+      const historyList = s.history || [];
+      const lockedMap = s.locked || {};
+      const h = historyList.find(x => x.round === s.round);
+      const rev = s.phase === 'revealed' && h;
+      const fin = rev && s.round === 10;
+      const balances = TEAMS.map(t => s.bal?.[t.id] || 0);
+      const mx = Math.max(...balances);
+      const lc = Object.values(lockedMap).filter(Boolean).length;
+
+      const cards = TEAMS.map((t, i) => {
+        const l = lockedMap[t.id];
+        const inner = rev ? `<div class="ch flip" style="--i:${i}">${h.choices[t.id]}</div><div class="pts flip" style="--i:${i}">${fmt(h.pay[t.id])} pts</div>` : `<div class="ch ${l ? '' : 'pulse'}">${l ? '🔒' : '…'}</div><div>${l ? 'Locked in' : 'Deciding'}</div>`;
+        return `<div class="pcard ${t.id}"><div class="nm">${t.name}${fin && (s.bal?.[t.id] === mx) ? ' 👑' : ''}</div>${inner}<div>Balance ${fmt(s.bal?.[t.id] || 0)}</div></div>`;
+      }).join('');
+
+      $('#app').innerHTML = `<div class="row" style="justify-content:space-between;margin-bottom:12px"><h1 style="margin:0;font-size:2.4rem">Round ${s.round} <span class="mut">/ 10</span></h1><div class="row">${MULT[s.round] ? '<span class="chip bonus" style="font-size:1.4rem">BONUS ×' + MULT[s.round] + ' · Cluster talk allowed</span>' : ''}<span class="chip" style="background:var(--p2);font-size:1.2rem">${lc}/4 locked</span></div></div>
+      <div class="grid4">${cards}</div>${rev ? '<p class="ctr mut" style="font-size:1.4rem">' + h.nX + ' X · ' + (4 - h.nX) + ' Y</p>' : ''}
+      <div class="panel ctr"><div class="mut">${fin ? 'FINAL ' : ''}CLUSTER TOTAL</div><div class="big ${cls(s.total || 0)}">${fmt(s.total || 0)} pts</div></div>`;
+    }
+
+    listenState(draw);
+  </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="./style.css">
+  <title>Player</title>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import { db, TEAMS, MULT, $, fmt, cls, bonus, listenState } from './common.js';
+    import { ref, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const team = urlParams.get('team') || location.pathname.split('/')[2];
+    const T = TEAMS.find(t => t.id === team);
+    let pick = null, rd = -1, S = null;
+
+    window.setPick = function(val) {
+      pick = val;
+      draw(S);
+    };
+
+    window.lock = async function() {
+      if (!pick) return;
+      const stateRef = ref(db, 'gameState');
+      await update(stateRef, {
+        [`locked/${team}`]: true,
+        [`choices/${team}`]: pick
+      });
+    };
+
+    function draw(s) {
+      S = s;
+      if (!T) {
+        $('#app').innerHTML = '<h1>Pick your team</h1><div class="grid4">' + TEAMS.map(t => `<a class="tc ${t.id}" style="font-size:1.6rem;padding:34px 0;text-decoration:none;color:inherit" href="./player.html?team=${t.id}">${t.name}</a>`).join('') + '</div>';
+        return;
+      }
+      if (s.round !== rd) { pick = null; rd = s.round; }
+
+      const lockedMap = s.locked || {};
+      const choicesMap = s.choices || {};
+      const l = lockedMap[team];
+      const historyList = s.history || [];
+      const h = historyList.find(x => x.round === s.round);
+      let b = '';
+
+      if (s.phase === 'lobby') {
+        b = '<div class="panel ctr"><h2>Waiting for the facilitator to start…</h2></div>';
+      } else if (s.phase === 'revealed' && h) {
+        b = `<div class="panel ctr"><p class="mut">Round ${s.round} result</p><div class="big">${h.choices[team]}</div><div class="big ${cls(h.pay[team])}">${fmt(h.pay[team])} pts</div><p class="mut">${s.round === 10 ? 'Game over — thanks for playing!' : 'Waiting for the next round…'}</p></div>`;
+      } else {
+        const c = l ? choicesMap[team] : pick;
+        b = `<div class="row" style="justify-content:center"><h2 style="margin:0">Round ${s.round}</h2>${bonus(s.round)}</div>${MULT[s.round] ? '<p class="mut ctr">Cluster-wide discussion allowed · payoff ×' + MULT[s.round] + '</p>' : ''}
+        <div class="xy"><button class="${c === 'X' ? 'sel' : ''}" ${l ? 'disabled' : ''} onclick="setPick('X')">X</button><button class="${c === 'Y' ? 'sel' : ''}" ${l ? 'disabled' : ''} onclick="setPick('Y')">Y</button></div>
+        ${l ? '<div class="panel ctr pulse"><b>🔒 Locked in: ' + choicesMap[team] + '</b><br><span class="mut">Waiting for the other teams…</span></div>' : `<button class="pri" style="width:100%;font-size:1.4rem;padding:18px" ${pick ? '' : 'disabled'} onclick="lock()">${pick ? 'Lock in ' + pick + ' (final)' : 'Choose X or Y'}</button>`}`;
+      }
+
+      $('#app').innerHTML = `<div class="tc ${team}" style="font-size:1.6rem;margin-bottom:14px">Team ${T.name}<small>Balance: ${fmt(s.bal?.[team] || 0)} pts</small></div>${b}`;
+    }
+
+    listenState(draw);
+  </script>
+</body>
+</html>
