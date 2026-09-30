@@ -3,7 +3,8 @@ import {
   getDatabase, ref, onValue, set, update 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Your Firebase Config with the correct Asia-Southeast Database URL
+const RTDB_URL = "https://win-as-much-as-you-can-e27d9-default-rtdb.asia-southeast1.firebasedatabase.app";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDC-tAqvjlyHEiBXi6J9_y45vG4-8rF8H0",
   authDomain: "win-as-much-as-you-can-e27d9.firebaseapp.com",
@@ -11,11 +12,13 @@ const firebaseConfig = {
   storageBucket: "win-as-much-as-you-can-e27d9.firebasestorage.app",
   messagingSenderId: "474597658335",
   appId: "1:474597658335:web:bbc1904084acc37b0ce36a",
-  databaseURL: "https://win-as-much-as-you-can-e27d9-default-rtdb.asia-southeast1.firebasedatabase.app"
+  databaseURL: RTDB_URL
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getDatabase(app);
+
+// CRITICAL FIX: Pass the RTDB_URL directly into getDatabase()
+export const db = getDatabase(app, RTDB_URL);
 
 export const TEAMS = [
   { id: 'red', name: 'Red' },
