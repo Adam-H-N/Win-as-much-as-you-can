@@ -3,7 +3,7 @@ import {
   getDatabase, ref, onValue, set, update 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Your Firebase Config
+// Your Firebase Config with the correct Asia-Southeast Database URL
 const firebaseConfig = {
   apiKey: "AIzaSyDC-tAqvjlyHEiBXi6J9_y45vG4-8rF8H0",
   authDomain: "win-as-much-as-you-can-e27d9.firebaseapp.com",
@@ -11,7 +11,7 @@ const firebaseConfig = {
   storageBucket: "win-as-much-as-you-can-e27d9.firebasestorage.app",
   messagingSenderId: "474597658335",
   appId: "1:474597658335:web:bbc1904084acc37b0ce36a",
-  databaseURL: "https://win-as-much-as-you-can-e27d9-default-rtdb.firebaseio.com" // Adjust if regional DB
+  databaseURL: "https://win-as-much-as-you-can-e27d9-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -31,9 +31,8 @@ export const fmt = n => n > 0 ? '+' + n : '' + n;
 export const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
 export const bonus = r => MULT[r] ? `<span class="chip bonus">BONUS ×${MULT[r]}</span>` : '';
 
-// Initial Game State Schema
 export const DEFAULT_STATE = {
-  phase: 'lobby', // 'lobby' | 'choosing' | 'revealed'
+  phase: 'lobby',
   round: 1,
   locked: { red: false, blue: false, yellow: false, green: false },
   choices: { red: null, blue: null, yellow: null, green: null },
@@ -42,7 +41,6 @@ export const DEFAULT_STATE = {
   total: 0
 };
 
-// Calculate payoff matrix based on choices
 export function calculatePayoff(choices, round) {
   const mult = MULT[round] || 1;
   const countX = Object.values(choices).filter(c => c === 'X').length;
@@ -63,7 +61,6 @@ export function calculatePayoff(choices, round) {
   return { pay, countX };
 }
 
-// Subscribe to state updates in Realtime DB
 export function listenState(callback) {
   const stateRef = ref(db, 'gameState');
   onValue(stateRef, (snapshot) => {
@@ -73,5 +70,7 @@ export function listenState(callback) {
     } else {
       callback(val);
     }
+  }, (error) => {
+    console.error("Firebase Read Error:", error);
   });
 }
