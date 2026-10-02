@@ -11,7 +11,7 @@
   <div id="app"></div>
 
   <script type="module">
-    import { db, TEAMS, MULT, $, fmt, cls, bonus, listenState, renderStageBar } from './common.js';
+    import { db, TEAMS, MULT, $, fmt, cls, bonus, listenState } from './common.js';
     import { ref, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -66,7 +66,6 @@
 
       $('#app').innerHTML = `
         <div class="tc ${team}" style="font-size:1.6rem;margin-bottom:14px">Team ${T.name}<small>Balance: ${fmt(s.bal?.[team] || 0)} pts</small></div>
-        ${s.phase !== 'lobby' ? renderStageBar(s.round) : ''}
         ${b}`;
     }
 
