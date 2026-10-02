@@ -5,8 +5,11 @@ body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-
 h1,h2,h3{margin:0 0 8px}.mut{color:var(--mut)}
 .panel{background:var(--panel);border-radius:14px;padding:16px;margin-bottom:14px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;margin-top:50px}
-@media(max-width:700px){.grid4{grid-template-columns:repeat(2,1fr)}}
+
+/* Top margin so the lifted crown doesn't clip top UI */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;margin-top:70px}
+@media(max-width:700px){.grid4{grid-template-columns:repeat(2,1fr);margin-top:90px}}
+
 button,select,input{font:inherit;border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;background:var(--p2);color:var(--tx)}
 input{font-weight:400;cursor:text;flex:1;min-width:200px;padding:10px}
 button.pri{background:var(--gold);color:#1a1300}button:disabled{opacity:.4;cursor:not-allowed}
@@ -20,14 +23,24 @@ table{width:100%;border-collapse:collapse}th,td{padding:8px;text-align:center;bo
 .xy{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
 .xy button{font-size:clamp(4rem,26vw,9rem);padding:24px 0;border-radius:20px}
 .xy button.sel{outline:6px solid var(--gold);background:#3a4380}
-.pcard{padding:18px;min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative;overflow:visible;transition:transform 0.3s ease, box-shadow 0.3s ease;}
-.pcard .nm{font-size:1.6rem;font-weight:900}.pcard .ch{font-size:5rem;font-weight:900;line-height:1}.pcard .pts{font-size:1.8rem}
+
+.pcard{padding:18px;min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative;overflow:visible !important;transition:transform 0.3s ease, box-shadow 0.3s ease;}
+
+/* Anchor context for crown */
+.pcard .nm{
+  font-size:1.6rem;
+  font-weight:900;
+  position:relative;
+}
+
+.pcard .ch{font-size:5rem;font-weight:900;line-height:1}
+.pcard .pts{font-size:1.8rem}
 .flip{animation:pop .7s both;animation-delay:calc(var(--i)*.3s)}
 @keyframes pop{0%{transform:rotateY(90deg) scale(.6);opacity:0}100%{transform:none;opacity:1}}
 .pulse{animation:pl 1.4s infinite}@keyframes pl{50%{opacity:.5}}
 .ctr{text-align:center}
 
-/* HUGE CROWN & WINNER CARD STYLING */
+/* WINNER STYLING & CROWN ANCHORED ABOVE .nm */
 .winner-card {
   outline: 8px solid var(--gold) !important;
   transform: translateY(-10px) scale(1.08) !important;
@@ -36,16 +49,17 @@ table{width:100%;border-collapse:collapse}th,td{padding:8px;text-align:center;bo
 }
 
 .crown-badge {
-  font-size: 8rem !important; /* MASSIVE CROWN */
+  font-size: 7.5rem !important;
   line-height: 1 !important;
   position: absolute !important;
-  top: -200px !important;
+  bottom: 100% !important; /* Pushes sitting baseline right above the team name */
   left: 50% !important;
   transform: translateX(-50%) !important;
-  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)) !important;
+  filter: drop-shadow(0 12px 18px rgba(0,0,0,0.8)) !important;
   animation: crownFloating 1.2s infinite alternate ease-in-out !important;
-  z-index: 99 !important;
+  z-index: 999 !important;
   pointer-events: none;
+  margin-bottom: 8px; /* Clearance gap above text */
 }
 
 .victory-banner {
@@ -83,7 +97,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:8px;text-align:center;bo
 
 @keyframes crownFloating {
   0% { transform: translateX(-50%) translateY(0) rotate(-8deg) scale(1); }
-  100% { transform: translateX(-50%) translateY(-18px) rotate(8deg) scale(1.15); }
+  100% { transform: translateX(-50%) translateY(-16px) rotate(8deg) scale(1.15); }
 }
 
 @keyframes bannerPop {
