@@ -16,8 +16,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
-// CRITICAL FIX: Pass the RTDB_URL directly into getDatabase()
 export const db = getDatabase(app, RTDB_URL);
 
 export const TEAMS = [
@@ -43,6 +41,38 @@ export const DEFAULT_STATE = {
   history: [],
   total: 0
 };
+
+export function getStageInfo(round) {
+  if (round <= 4) {
+    return { stage: 1, name: 'Stage 1: Building Basics', range: 'Rounds 1–4' };
+  } else if (round === 5) {
+    return { stage: 2, name: 'Stage 2: First Pivot (×3)', range: 'Round 5' };
+  } else if (round <= 7) {
+    return { stage: 3, name: 'Stage 3: Escalation', range: 'Rounds 6–7' };
+  } else {
+    return { stage: 4, name: 'Stage 4: Final Sprint (×5 & ×10)', range: 'Rounds 8–10' };
+  }
+}
+
+export function renderStageBar(round) {
+  const info = getStageInfo(round || 1);
+  return `
+    <div class="stage-container">
+      <div class="stage-header">
+        <span class="stage-badge stage-${info.stage}">STAGE ${info.stage}</span>
+        <span class="stage-title">${info.name}</span>
+      </div>
+      <div class="stage-stepper">
+        <div class="step ${info.stage >= 1 ? 'active' : ''}">1</div>
+        <div class="step-line ${info.stage > 1 ? 'active' : ''}"></div>
+        <div class="step ${info.stage >= 2 ? 'active' : ''}">2</div>
+        <div class="step-line ${info.stage > 2 ? 'active' : ''}"></div>
+        <div class="step ${info.stage >= 3 ? 'active' : ''}">3</div>
+        <div class="step-line ${info.stage > 3 ? 'active' : ''}"></div>
+        <div class="step ${info.stage >= 4 ? 'active' : ''}">4</div>
+      </div>
+    </div>`;
+}
 
 export function calculatePayoff(choices, round) {
   const mult = MULT[round] || 1;
@@ -76,37 +106,4 @@ export function listenState(callback) {
   }, (error) => {
     console.error("Firebase Read Error:", error);
   });
-}
-// Add to common.js
-
-export function getStageInfo(round) {
-  if (round <= 4) {
-    return { stage: 1, name: 'Stage 1: Building Basics', range: 'Rounds 1–4', pct: (round / 4) * 100 };
-  } else if (round === 5) {
-    return { stage: 2, name: 'Stage 2: First Pivot (×3)', range: 'Round 5', pct: 100 };
-  } else if (round <= 7) {
-    return { stage: 3, name: 'Stage 3: Escalation', range: 'Rounds 6–7', pct: ((round - 5) / 2) * 100 };
-  } else {
-    return { stage: 4, name: 'Stage 4: Final Sprint (×5 & ×10)', range: 'Rounds 8–10', pct: ((round - 7) / 3) * 100 };
-  }
-}
-
-export function renderStageBar(round) {
-  const info = getStageInfo(round);
-  return `
-    <div class="stage-container">
-      <div class="stage-header">
-        <span class="stage-badge stage-${info.stage}">STAGE ${info.stage}</span>
-        <span class="stage-title">${info.name}</span>
-      </div>
-      <div class="stage-stepper">
-        <div class="step ${info.stage >= 1 ? 'active' : ''}">1</div>
-        <div class="step-line ${info.stage > 1 ? 'active' : ''}"></div>
-        <div class="step ${info.stage >= 2 ? 'active' : ''}">2</div>
-        <div class="step-line ${info.stage > 2 ? 'active' : ''}"></div>
-        <div class="step ${info.stage >= 3 ? 'active' : ''}">3</div>
-        <div class="step-line ${info.stage > 3 ? 'active' : ''}"></div>
-        <div class="step ${info.stage >= 4 ? 'active' : ''}">4</div>
-      </div>
-    </div>`;
 }
