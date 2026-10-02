@@ -44,13 +44,13 @@ export const DEFAULT_STATE = {
 
 export function getStageInfo(round) {
   if (round <= 4) {
-    return { stage: 1, name: 'Stage 1: Building Basics', range: 'Rounds 1–4' };
+    return { stage: 1, name: 'Building Basics', range: 'Rounds 1–4' };
   } else if (round === 5) {
-    return { stage: 2, name: 'Stage 2: First Pivot (×3)', range: 'Round 5' };
+    return { stage: 2, name: 'First Pivot (×3)', range: 'Round 5' };
   } else if (round <= 7) {
-    return { stage: 3, name: 'Stage 3: Escalation', range: 'Rounds 6–7' };
+    return { stage: 3, name: 'Escalation', range: 'Rounds 6–7' };
   } else {
-    return { stage: 4, name: 'Stage 4: Final Sprint (×5 & ×10)', range: 'Rounds 8–10' };
+    return { stage: 4, name: 'Final Sprint (×5 & ×10)', range: 'Rounds 8–10' };
   }
 }
 
