@@ -98,8 +98,10 @@
 
         return `
           <div class="pcard ${t.id} ${isWinner ? 'winner-card' : ''}">
-            ${crownVisual}
-            <div class="nm">${t.name}</div>
+            <div class="nm">
+              ${crownVisual}
+              ${t.name}
+            </div>
             ${inner}
             <div class="bal-tag">Balance: ${fmt(s.bal?.[t.id] || 0)}</div>
           </div>`;
