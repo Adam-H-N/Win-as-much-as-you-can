@@ -10,11 +10,11 @@
   <div id="app"></div>
 
   <script type="module">
-    import { db, TEAMS, MULT, $, fmt, cls, bonus, DEFAULT_STATE, calculatePayoff, listenState } from './common.js';
+    import { db, TEAMS, MULT, $, fmt, cls, bonus, DEFAULT_STATE, calculatePayoff, listenState, renderStageBar } from './common.js';
     import { ref, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     let S = null;
-    const base = location.origin + location.pathname.replace('/index.html', '');
+    const base = location.origin + location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '');
 
     window.act = async function(action, param) {
       const stateRef = ref(db, 'gameState');
@@ -23,8 +23,8 @@
         await update(stateRef, { phase: 'choosing', round: 1 });
       } else if (action === 'reveal') {
         const { pay, countX } = calculatePayoff(S.choices, S.round);
-        const newBal = { ...S.bal };
-        for (const t of TEAMS) { newBal[t.id] += pay[t.id]; }
+        const newBal = { ...(S.bal || { red: 0, blue: 0, yellow: 0, green: 0 }) };
+        for (const t of TEAMS) { newBal[t.id] = (newBal[t.id] || 0) + pay[t.id]; }
         const roundTotal = Object.values(pay).reduce((a, b) => a + b, 0);
 
         const historyRecord = {
@@ -80,7 +80,9 @@
 
       const links = [['📺 Projector', './projector.html', 'blue']].concat(TEAMS.map(t => [t.name + ' team', `./player.html?team=${t.id}`, t.id])).map(l => `<div class="row" style="margin:6px 0"><span class="chip ${l[2]}" style="min-width:110px;text-align:center">${l[0]}</span><input readonly value="${base + '/' + l[1]}" onfocus="this.select()"><a href="${l[1]}" target="_blank">Open</a></div>`).join('');
 
-      $('#app').innerHTML = `<div class="panel"><h1>🎯 Win As Much As You Can — Facilitator</h1><p class="mut">Send each team its link or let them scan the URL on their phone.</p>${links}</div>
+      $('#app').innerHTML = `
+      <div class="panel"><h1>🎯 Win As Much As You Can — Facilitator</h1><p class="mut">Send each team its link or let them scan the URL on their phone.</p>${links}</div>
+      ${renderStageBar(s.round)}
       <div class="panel"><div class="row"><h2 style="margin:0">Round ${s.round || '—'}</h2>${bonus(s.round)}<select onchange="act('goto',this.value)"><option disabled ${s.round ? '' : 'selected'}>Jump to round…</option>${opts}</select>${ctl}<button onclick="confirm('Reset the whole game?')&&act('reset')">↺ Reset</button></div>
       ${MULT[s.round] ? '<p class="mut">Bonus round: cluster-wide discussion allowed. Payoff ×' + MULT[s.round] + '.</p>' : ''}</div>
       <div class="grid4">${cards}</div>
