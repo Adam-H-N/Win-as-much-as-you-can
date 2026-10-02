@@ -6,7 +6,144 @@
   <link rel="stylesheet" href="./style.css">
   <title>Projector</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="./style.css">
+  <title>Projector</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import { TEAMS, MULT, $, fmt, cls, listenState } from './common.js';
+
+    let confettiFired = false;
+
+    function fireCelebration() {
+      if (confettiFired) return;
+      confettiFired = true;
+
+      confetti({ particleCount: 120, spread: 100, origin: { y: 0.5 } });
+
+      const duration = 5 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 6,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0, y: 0.7 },
+          colors: ['#ffd166', '#e5484d', '#3b82f6', '#30a46c']
+        });
+        confetti({
+          particleCount: 6,
+          angle: 120,
+          spread: 60,
+          origin: { x: 1, y: 0.7 },
+          colors: ['#ffd166', '#e5484d', '#3b82f6', '#30a46c']
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      })();
+    }
+
+    function draw(s) {
+      if (s.phase === 'lobby') {
+        confettiFired = false;
+        $('#app').innerHTML = `
+          <div class="ctr" style="padding-top:8vh">
+            <h1 style="font-size:3.5rem;margin-bottom:12px">🎯 Win As Much As You Can</h1>
+            <p class="mut" style="font-size:1.5rem;line-height:1.6">
+              <span class="chip red">Red</span> · 
+              <span class="chip blue">Blue</span> · 
+              <span class="chip yellow">Yellow</span> · 
+              <span class="chip green">Green</span>
+              <br><br>Waiting for the facilitator to start the game…
+            </p>
+          </div>`;
+        return;
+      }
+
+      if (s.round < 10 || s.phase !== 'revealed') {
+        confettiFired = false;
+      }
+
+      const historyList = s.history || [];
+      const lockedMap = s.locked || {};
+      const h = historyList.find(x => x.round === s.round);
+      const rev = s.phase === 'revealed' && h;
+      const fin = rev && s.round === 10;
+      const balances = TEAMS.map(t => s.bal?.[t.id] || 0);
+      const mx = Math.max(...balances);
+      const lc = Object.values(lockedMap).filter(Boolean).length;
+
+      if (fin) {
+        fireCelebration();
+      }
+
+      const winners = TEAMS.filter(t => fin && (s.bal?.[t.id] === mx)).map(t => t.name);
+
+      const cards = TEAMS.map((t, i) => {
+        const l = lockedMap[t.id];
+        const isWinner = fin && s.bal?.[t.id] === mx;
+        
+        const crownVisual = isWinner 
+          ? `<div class="crown-badge">👑</div>` 
+          : '';
+
+        const inner = rev 
+          ? `<div class="ch flip" style="--i:${i}">${h.choices[t.id]}</div>
+             <div class="pts flip" style="--i:${i}">${fmt(h.pay[t.id])} pts</div>` 
+          : `<div class="ch ${l ? '' : 'pulse'}">${l ? '🔒' : '…'}</div>
+             <div style="font-size:1.1rem;font-weight:700;margin-top:4px">${l ? 'Locked in' : 'Deciding'}</div>`;
+
+        return `
+          <div class="pcard ${t.id} ${isWinner ? 'winner-card' : ''}">
+            ${crownVisual}
+            <div class="nm">${t.name}</div>
+            ${inner}
+            <div class="bal-tag">Balance: ${fmt(s.bal?.[t.id] || 0)}</div>
+          </div>`;
+      }).join('');
+
+      const winnerBanner = fin ? `
+        <div class="victory-banner">
+          🏆 WINNER: <b>${winners.join(' & ')} Team</b> 🏆
+        </div>` : '';
+
+      $('#app').innerHTML = `
+        ${winnerBanner}
+        <div class="row" style="justify-content:space-between;margin-bottom:16px">
+          <h1 style="margin:0;font-size:2.5rem;display:flex;align-items:center;gap:12px">
+            Round ${s.round} <span class="mut" style="font-size:1.8rem">/ 10</span>
+          </h1>
+          <div class="row">
+            ${MULT[s.round] ? '<span class="chip bonus" style="font-size:1.3rem">🔥 BONUS ×' + MULT[s.round] + ' · Cluster talk allowed</span>' : ''}
+            <span class="chip" style="background:var(--p2);font-size:1.2rem;padding:6px 16px">${lc}/4 locked</span>
+          </div>
+        </div>
+
+        <div class="grid4">${cards}</div>
+        
+        ${rev ? '<p class="ctr mut" style="font-size:1.5rem;font-weight:700;margin:16px 0">' + h.nX + ' X &nbsp;·&nbsp; ' + (4 - h.nX) + ' Y</p>' : ''}
+        
+        <div class="panel ctr" style="padding:20px;border: 1px solid var(--p2)">
+          <div class="mut" style="font-size:1.2rem;letter-spacing:1px;font-weight:800">${fin ? '🏁 FINAL ' : ''}CLUSTER TOTAL</div>
+          <div class="big ${cls(s.total || 0)}">${fmt(s.total || 0)} pts</div>
+        </div>`;
+    }
+
+    listenState(draw);
+  </script>
+</body>
+</html>
 <body>
   <div id="app"></div>
 
