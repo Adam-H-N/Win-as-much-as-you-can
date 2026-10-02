@@ -10,7 +10,7 @@
   <div id="app"></div>
 
   <script type="module">
-    import { db, TEAMS, MULT, $, fmt, cls, bonus, DEFAULT_STATE, calculatePayoff, listenState, renderStageBar } from './common.js';
+    import { db, TEAMS, MULT, $, fmt, cls, bonus, DEFAULT_STATE, calculatePayoff, listenState } from './common.js';
     import { ref, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     let S = null;
@@ -82,7 +82,6 @@
 
       $('#app').innerHTML = `
       <div class="panel"><h1>🎯 Win As Much As You Can — Facilitator</h1><p class="mut">Send each team its link or let them scan the URL on their phone.</p>${links}</div>
-      ${renderStageBar(s.round)}
       <div class="panel"><div class="row"><h2 style="margin:0">Round ${s.round || '—'}</h2>${bonus(s.round)}<select onchange="act('goto',this.value)"><option disabled ${s.round ? '' : 'selected'}>Jump to round…</option>${opts}</select>${ctl}<button onclick="confirm('Reset the whole game?')&&act('reset')">↺ Reset</button></div>
       ${MULT[s.round] ? '<p class="mut">Bonus round: cluster-wide discussion allowed. Payoff ×' + MULT[s.round] + '.</p>' : ''}</div>
       <div class="grid4">${cards}</div>
