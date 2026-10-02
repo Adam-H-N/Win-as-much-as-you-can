@@ -39,7 +39,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:8px;text-align:center;bo
   font-size: 8rem !important; /* MASSIVE CROWN */
   line-height: 1 !important;
   position: absolute !important;
-  top: -110px !important;
+  top: -140px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)) !important;
