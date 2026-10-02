@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="./style.css">
   <title>Player</title>
+  <!-- Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <div id="app"></div>
@@ -17,6 +19,7 @@
     const team = urlParams.get('team') || location.pathname.split('/')[2];
     const T = TEAMS.find(t => t.id === team);
     let pick = null, rd = -1, S = null;
+    let confettiFired = false;
 
     window.setPick = function(val) {
       pick = val;
@@ -38,7 +41,7 @@
         $('#app').innerHTML = '<h1>Pick your team</h1><div class="grid4">' + TEAMS.map(t => `<a class="tc ${t.id}" style="font-size:1.6rem;padding:34px 0;text-decoration:none;color:inherit" href="./player.html?team=${t.id}">${t.name}</a>`).join('') + '</div>';
         return;
       }
-      if (s.round !== rd) { pick = null; rd = s.round; }
+      if (s.round !== rd) { pick = null; rd = s.round; confettiFired = false; }
 
       const lockedMap = s.locked || {};
       const choicesMap = s.choices || {};
@@ -50,7 +53,11 @@
       if (s.phase === 'lobby') {
         b = '<div class="panel ctr"><h2>Waiting for the facilitator to start…</h2></div>';
       } else if (s.phase === 'revealed' && h) {
-        b = `<div class="panel ctr"><p class="mut">Round ${s.round} result</p><div class="big">${h.choices[team]}</div><div class="big ${cls(h.pay[team])}">${fmt(h.pay[team])} pts</div><p class="mut">${s.round === 10 ? 'Game over — thanks for playing!' : 'Waiting for the next round…'}</p></div>`;
+        if (s.round === 10 && !confettiFired) {
+          confettiFired = true;
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+        b = `<div class="panel ctr"><p class="mut">Round ${s.round} result</p><div class="big">${h.choices[team]}</div><div class="big ${cls(h.pay[team])}">${fmt(h.pay[team])} pts</div><p class="mut">${s.round === 10 ? '🎉 Game over — thanks for playing!' : 'Waiting for the next round…'}</p></div>`;
       } else {
         const c = l ? choicesMap[team] : pick;
         b = `<div class="row" style="justify-content:center"><h2 style="margin:0">Round ${s.round}</h2>${bonus(s.round)}</div>${MULT[s.round] ? '<p class="mut ctr">Cluster-wide discussion allowed · payoff ×' + MULT[s.round] + '</p>' : ''}
