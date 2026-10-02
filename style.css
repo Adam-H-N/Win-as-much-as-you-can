@@ -26,3 +26,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:8px;text-align:center;bo
 @keyframes pop{0%{transform:rotateY(90deg) scale(.6);opacity:0}100%{transform:none;opacity:1}}
 .pulse{animation:pl 1.4s infinite}@keyframes pl{50%{opacity:.5}}
 .ctr{text-align:center}
+.winner-card {
+  outline: 4px solid var(--gold);
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 10px var(--gold); }
+  to { box-shadow: 0 0 25px var(--gold); }
+}
