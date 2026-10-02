@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="./style.css">
   <title>Player</title>
-  <!-- Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <div id="app"></div>
 
   <script type="module">
-    import { db, TEAMS, MULT, $, fmt, cls, bonus, listenState } from './common.js';
+    import { db, TEAMS, MULT, $, fmt, cls, bonus, listenState, renderStageBar } from './common.js';
     import { ref, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -65,7 +64,10 @@
         ${l ? '<div class="panel ctr pulse"><b>🔒 Locked in: ' + choicesMap[team] + '</b><br><span class="mut">Waiting for the other teams…</span></div>' : `<button class="pri" style="width:100%;font-size:1.4rem;padding:18px" ${pick ? '' : 'disabled'} onclick="lock()">${pick ? 'Lock in ' + pick + ' (final)' : 'Choose X or Y'}</button>`}`;
       }
 
-      $('#app').innerHTML = `<div class="tc ${team}" style="font-size:1.6rem;margin-bottom:14px">Team ${T.name}<small>Balance: ${fmt(s.bal?.[team] || 0)} pts</small></div>${b}`;
+      $('#app').innerHTML = `
+        <div class="tc ${team}" style="font-size:1.6rem;margin-bottom:14px">Team ${T.name}<small>Balance: ${fmt(s.bal?.[team] || 0)} pts</small></div>
+        ${s.phase !== 'lobby' ? renderStageBar(s.round) : ''}
+        ${b}`;
     }
 
     listenState(draw);
